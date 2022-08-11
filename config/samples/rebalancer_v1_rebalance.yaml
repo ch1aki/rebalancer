@@ -1,0 +1,37 @@
+apiVersion: rebalancer.ch1aki.github.io/v1
+kind: Rebalance
+metadata:
+  name: rebalance-sample
+spec:
+  dryRun: false
+  interval: 1m
+  policy:
+    targettracking:
+      targetValue: 1
+      baseValue: 1
+  target:
+    route53:
+      hostedZoneID: hostedzone/Z111111QQQQQQQ
+      region: ap-northeast-1
+      resource:
+        name: www.example.com
+        type: A
+        identifier: record1
+      auth:
+        secretRef:
+          accessKeyIDSecretRef:
+            name: aws-secret
+            key: access-key
+          secretAccessKeySecretRef:
+            name: aws-secret
+            key: secret-access-key
+  metrics:
+    prometheus:
+      address: http://prometheus-kube-prometheus-prometheus.default.svc.cluster.local:9090
+      timeout: 30
+      query: |-
+        scalar(avg(
+          sum(
+            rate(node_cpu_seconds_total{mode!="idle"}[5m])
+          ) without (mode)
+        )) * 10

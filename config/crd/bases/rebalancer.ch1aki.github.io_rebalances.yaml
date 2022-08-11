@@ -1,0 +1,252 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.2
+  creationTimestamp: null
+  name: rebalances.rebalancer.ch1aki.github.io
+spec:
+  group: rebalancer.ch1aki.github.io
+  names:
+    kind: Rebalance
+    listKind: RebalanceList
+    plural: rebalances
+    singular: rebalance
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.lastUpdateAt
+      name: Last Update
+      type: date
+    - jsonPath: .status.condition
+      name: Condition
+      type: string
+    - jsonPath: .spec.dryRun
+      name: Dry Run
+      priority: 10
+      type: boolean
+    - jsonPath: .status.desiredValue
+      name: Desired
+      priority: 10
+      type: integer
+    - jsonPath: .status.actualValue
+      name: Actual
+      priority: 10
+      type: integer
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: Rebalance is the Schema for the rebalances API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RebalanceSpec defines the desired state of Rebalance
+            properties:
+              dryRun:
+                default: false
+                description: DryRun is the flag of dry-run operation.
+                type: boolean
+              interval:
+                type: string
+              metrics:
+                description: Used to configure the datasource. Only one data source
+                  may be set
+                maxProperties: 1
+                minProperties: 1
+                properties:
+                  prometheus:
+                    properties:
+                      address:
+                        type: string
+                      auth:
+                        properties:
+                          secretRef:
+                            properties:
+                              passwordSecretRef:
+                                description: The Password is used for authentication
+                                properties:
+                                  key:
+                                    description: The key of the entry in the Secret
+                                      resource's `data` field to be used. Some instances
+                                      of this field may be defaulted, in others it
+                                      may be required.
+                                    type: string
+                                  name:
+                                    description: The name of the Secret resource being
+                                      referred to.
+                                    type: string
+                                  namespace:
+                                    description: Namespace of the resource being referred
+                                      to. Ignored if referent is not cluster-scoped.
+                                      cluster-scoped defaults to the namespace of
+                                      the referent.
+                                    type: string
+                                type: object
+                              userSecretRef:
+                                description: The User is used for authentication
+                                properties:
+                                  key:
+                                    description: The key of the entry in the Secret
+                                      resource's `data` field to be used. Some instances
+                                      of this field may be defaulted, in others it
+                                      may be required.
+                                    type: string
+                                  name:
+                                    description: The name of the Secret resource being
+                                      referred to.
+                                    type: string
+                                  namespace:
+                                    description: Namespace of the resource being referred
+                                      to. Ignored if referent is not cluster-scoped.
+                                      cluster-scoped defaults to the namespace of
+                                      the referent.
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      query:
+                        type: string
+                      timeout:
+                        format: int64
+                        type: integer
+                    required:
+                    - address
+                    - query
+                    type: object
+                type: object
+              policy:
+                description: Used to configure the policy
+                maxProperties: 1
+                minProperties: 1
+                properties:
+                  targettracking:
+                    properties:
+                      baseValue:
+                        format: int64
+                        type: integer
+                      disableScaleIn:
+                        type: boolean
+                      targetValue:
+                        format: int64
+                        type: integer
+                    required:
+                    - baseValue
+                    - targetValue
+                    type: object
+                type: object
+              target:
+                description: Used to configure the target. Only one target may be
+                  set
+                maxProperties: 1
+                minProperties: 1
+                properties:
+                  route53:
+                    properties:
+                      auth:
+                        properties:
+                          secretRef:
+                            properties:
+                              accessKeyIDSecretRef:
+                                description: The AccessKeyID is used for authentication
+                                properties:
+                                  key:
+                                    description: The key of the entry in the Secret
+                                      resource's `data` field to be used. Some instances
+                                      of this field may be defaulted, in others it
+                                      may be required.
+                                    type: string
+                                  name:
+                                    description: The name of the Secret resource being
+                                      referred to.
+                                    type: string
+                                  namespace:
+                                    description: Namespace of the resource being referred
+                                      to. Ignored if referent is not cluster-scoped.
+                                      cluster-scoped defaults to the namespace of
+                                      the referent.
+                                    type: string
+                                type: object
+                              secretAccessKeySecretRef:
+                                description: The SecretAccessKey is used for authentication
+                                properties:
+                                  key:
+                                    description: The key of the entry in the Secret
+                                      resource's `data` field to be used. Some instances
+                                      of this field may be defaulted, in others it
+                                      may be required.
+                                    type: string
+                                  name:
+                                    description: The name of the Secret resource being
+                                      referred to.
+                                    type: string
+                                  namespace:
+                                    description: Namespace of the resource being referred
+                                      to. Ignored if referent is not cluster-scoped.
+                                      cluster-scoped defaults to the namespace of
+                                      the referent.
+                                    type: string
+                                type: object
+                            type: object
+                        type: object
+                      hostedZoneID:
+                        type: string
+                      region:
+                        type: string
+                      resource:
+                        properties:
+                          identifier:
+                            type: string
+                          name:
+                            type: string
+                          type:
+                            type: string
+                        required:
+                        - name
+                        - type
+                        type: object
+                    required:
+                    - hostedZoneID
+                    - resource
+                    type: object
+                type: object
+            required:
+            - metrics
+            - policy
+            - target
+            type: object
+          status:
+            description: RebalanceStatus defines the observed state of Rebalance
+            properties:
+              actualValue:
+                format: int64
+                type: integer
+              condition:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                type: string
+              desiredValue:
+                format: int64
+                type: integer
+              lastUpdateAt:
+                type: string
+            required:
+            - condition
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
