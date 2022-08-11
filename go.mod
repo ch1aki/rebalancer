@@ -1,4 +1,4 @@
-module github.com/ch1aki/balancer
+module github.com/ch1aki/rebalancer
 
 go 1.18
 
