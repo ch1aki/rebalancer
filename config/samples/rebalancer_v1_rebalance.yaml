@@ -1,0 +1,6 @@
+apiVersion: rebalancer.ch1aki.github.io/v1
+kind: Rebalance
+metadata:
+  name: rebalance-sample
+spec:
+  # TODO(user): Add fields here

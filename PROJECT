@@ -3,4 +3,14 @@ layout:
 - go.kubebuilder.io/v3
 projectName: rebalance-controller
 repo: github.com/ch1aki/rebalancer
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: ch1aki.github.io
+  group: rebalancer
+  kind: Rebalance
+  path: github.com/ch1aki/rebalancer/api/v1
+  version: v1
 version: "3"
