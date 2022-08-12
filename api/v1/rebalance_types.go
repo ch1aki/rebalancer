@@ -28,14 +28,75 @@ type RebalanceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Rebalance. Edit rebalance_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Used to configure the target. Only one target may be set
+	Target RebalanceTarget `json:"target"`
+
+	// Used to configure the datasource. Only one data source may be set
+	DataSource RebalanceDataSource `json:"dataSource"`
+
+	// Used to configure the rule
+	Rule RebalanceRule `json:"rule"`
+
+	// DryRun is the flag of dry-run operation.
+	// +kubebuilder:default=false
+	// +optional
+	DryRun bool `json:"dryRun,omitempty"`
 }
+
+type RebalanceTarget struct {
+	Route53 *Route53Target `json:"route53,omitempty"`
+}
+
+type RebalanceDataSource struct {
+	Prometheus *PrometheusDataSource `json:"prometheus,omitempty"`
+}
+
+type RebalanceRule struct {
+	Flactation RebalanceRuleFlactation `json:"flactation"`
+	Threshold  RebalanceRuleThreshold  `json:"threshold"`
+
+	// +optional
+	Interval string `json:"interval,omitempty"`
+}
+
+type RebalanceRuleFlactation struct {
+	Variation string `json:"variation"`
+	Max       string `json:"max"`
+	Min       string `json:"min"`
+}
+
+type ThresholdOperator string
+
+const (
+	GreaterThan        = ThresholdOperator("greaterThan")
+	GreaterThanOrEqual = ThresholdOperator("greaterThanOrEqual")
+	LessThan           = ThresholdOperator("lessThan")
+	LessThanOrEqual    = ThresholdOperator("lessThanOrEqual")
+)
+
+type RebalanceRuleThreshold struct {
+	Value string `json:"value"`
+
+	//+kubebuilder:validation:Enum=greaterThan;greaterThanOrEqual;lessThan;lessThanOrEqual
+	Rule ThresholdOperator `json:"operator"`
+}
+
+type RebalanceCondition string
+
+const (
+	RebalanceNotReady  = RebalanceCondition("NotReady")
+	RebalanceAvailable = RebalanceCondition("Available")
+	RebalanceHealty    = RebalanceCondition("Health")
+)
 
 // RebalanceStatus defines the observed state of Rebalance
 type RebalanceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Condition RebalanceCondition `json:"condition"`
+
+	// +optional
+	CurrentValue string `json:"currentValue"`
 }
 
 //+kubebuilder:object:root=true

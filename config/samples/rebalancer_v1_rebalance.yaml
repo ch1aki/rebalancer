@@ -3,4 +3,46 @@ kind: Rebalance
 metadata:
   name: rebalance-sample
 spec:
-  # TODO(user): Add fields here
+  dryRun: false
+  rule:
+    flactation:
+      variation: 1m
+      max: "10"
+      min: "2"
+    threshold:
+      value: "0.9"
+      operator: greaterThanOrEqual
+    interval: 1m
+  target:
+    route53:
+      hostedZoneID: exampleZoneID
+      auth:
+        secretRef:
+          accessKeyIDSecretRef:
+            name: aws-secret
+            key: access-key
+          secretAccessKeySecretRef:
+            name: aws-secret
+            key: secret-access-key
+      resource:
+        name: www.example.com
+        type: A
+        identifier: www
+  dataSource:
+    prometheus:
+      address: prometheus-server.cluster.local
+      auth:
+        secretRef:
+          userSecretRef:
+            name: prom-secret
+            key: user
+          passwordSecretRef:
+            name: prom-secret
+            key: password
+      timeout: 30s
+      query: |-
+        avg(
+          sum(
+            rate(node_cpu_seconds_total{mode!="idle"}[5m])
+          ) without (mode)
+        )
