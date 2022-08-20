@@ -53,7 +53,7 @@ type RebalanceDataSource struct {
 
 type RebalanceRule struct {
 	Flactation RebalanceRuleFlactation `json:"flactation"`
-	Threshold  RebalanceRuleThreshold  `json:"threshold"`
+	Condition  string                  `json:"condition"`
 
 	// +optional
 	Interval string `json:"interval,omitempty"`
@@ -63,22 +63,6 @@ type RebalanceRuleFlactation struct {
 	Variation string `json:"variation"`
 	Max       string `json:"max"`
 	Min       string `json:"min"`
-}
-
-type ThresholdOperator string
-
-const (
-	GreaterThan        = ThresholdOperator("greaterThan")
-	GreaterThanOrEqual = ThresholdOperator("greaterThanOrEqual")
-	LessThan           = ThresholdOperator("lessThan")
-	LessThanOrEqual    = ThresholdOperator("lessThanOrEqual")
-)
-
-type RebalanceRuleThreshold struct {
-	Value string `json:"value"`
-
-	//+kubebuilder:validation:Enum=greaterThan;greaterThanOrEqual;lessThan;lessThanOrEqual
-	Rule ThresholdOperator `json:"operator"`
 }
 
 type RebalanceCondition string

@@ -92,7 +92,8 @@ spec:
                       query:
                         type: string
                       timeout:
-                        type: string
+                        format: int64
+                        type: integer
                     required:
                     - address
                     - query
@@ -105,6 +106,8 @@ spec:
               rule:
                 description: Used to configure the rule
                 properties:
+                  condition:
+                    type: string
                   flactation:
                     properties:
                       max:
@@ -120,24 +123,9 @@ spec:
                     type: object
                   interval:
                     type: string
-                  threshold:
-                    properties:
-                      operator:
-                        enum:
-                        - greaterThan
-                        - greaterThanOrEqual
-                        - lessThan
-                        - lessThanOrEqual
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - operator
-                    - value
-                    type: object
                 required:
+                - condition
                 - flactation
-                - threshold
                 type: object
               target:
                 description: Used to configure the target. Only one target may be

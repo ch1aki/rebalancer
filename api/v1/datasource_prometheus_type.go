@@ -17,7 +17,7 @@ type PrometheusDataSource struct {
 	Query   string `json:"query"`
 
 	// +optional
-	Timeout string `json:"timeout"`
+	Timeout int64 `json:"timeout"`
 
 	// +optional
 	Auth BasicAuth `json:"auth"`

@@ -9,9 +9,7 @@ spec:
       variation: 1m
       max: "10"
       min: "2"
-    threshold:
-      value: "0.9"
-      operator: greaterThanOrEqual
+    condition: "result[0]>=1000"
     interval: 1m
   target:
     route53:
@@ -30,7 +28,7 @@ spec:
         identifier: www
   dataSource:
     prometheus:
-      address: prometheus-server.cluster.local
+      address: http://prometheus-kube-prometheus-prometheus.default.svc.cluster.local:9090
       auth:
         secretRef:
           userSecretRef:
@@ -39,7 +37,7 @@ spec:
           passwordSecretRef:
             name: prom-secret
             key: password
-      timeout: 30s
+      timeout: 30
       query: |-
         avg(
           sum(

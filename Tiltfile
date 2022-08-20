@@ -1,5 +1,6 @@
 load('ext://restart_process', 'docker_build_with_restart')
 load('ext://cert_manager', 'deploy_cert_manager')
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
 
 def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLERGEN='crd rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases;'):
 
@@ -48,5 +49,7 @@ def kubebuilder(DOMAIN, GROUP, VERSION, KIND, IMG='controller:latest', CONTROLLE
        ]
     )
 
+helm_repo('prometheus-community', 'https://prometheus-community.github.io/helm-charts')
+helm_resource('prometheus', 'prometheus-community/kube-prometheus-stack', resource_deps=["prometheus-community"])
 deploy_cert_manager(version="v1.6.1")
 kubebuilder("ch1aki.github.io", "rebalancer", "v1", "Rebalance")
