@@ -6,10 +6,10 @@ spec:
   dryRun: false
   rule:
     flactation:
-      variation: 1m
+      variation: "1"
       max: "10"
       min: "2"
-    condition: "result[0]>=1000"
+    condition: "result[0]>=0"
     interval: 1m
   target:
     route53:

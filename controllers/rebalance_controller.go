@@ -29,6 +29,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/argoproj/argo-rollouts/utils/evaluate"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/aws/aws-sdk-go-v2/service/route53/types"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
@@ -72,10 +76,13 @@ func (r *RebalanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
-	_, err = r.evalCondition(ctx, rebalance)
+	cond, err := r.evalCondition(ctx, rebalance)
 	if err != nil {
 		logger.Error(err, "unable to eval condition", "name", req.NamespacedName)
 		return ctrl.Result{}, err
+	}
+	if cond {
+		r.rebalance(ctx, rebalance)
 	}
 
 	refreshInt, err := time.ParseDuration(rebalance.Spec.Rule.Interval)
@@ -152,6 +159,59 @@ func (r *RebalanceReconciler) updateStatus(ctx context.Context, rebalance rebala
 	// TODO
 
 	return ctrl.Result{}, nil
+}
+
+func (r *RebalanceReconciler) rebalance(ctx context.Context, rebalance rebalancerv1.Rebalance) error {
+	logger := log.FromContext(ctx)
+	logger.Info("execute rebalance")
+
+	hostedZoneId := rebalance.Spec.Target.Route53.HostedZoneID
+	recordName := rebalance.Spec.Target.Route53.Resource.Name
+	recordId := rebalance.Spec.Target.Route53.Resource.Identifier
+
+	session := session.Must(session.NewSession())
+	client := route53.New(session)
+	out, err := client.ListResourceRecordSets(ctx,
+		&route53.ListResourceRecordSetsInput{
+			HostedZoneId:          aws.String(hostedZoneId),
+			StartRecordName:       aws.String(recordName),
+			StartRecordIdentifier: aws.String(recordId),
+		},
+	)
+	if err != nil {
+		logger.Error(err, "list records error")
+		return err
+	}
+	if len(out.ResourceRecordSets) == 0 {
+		logger.Error(err, "list records error")
+		return fmt.Errorf("does't exist match record")
+	}
+
+	for _, rr := range out.ResourceRecordSets {
+		if *rr.Name == recordName && *rr.SetIdentifier == recordId {
+			changes := route53.ChangeResourceRecordSetsInput{
+				HostedZoneId: &hostedZoneId,
+				ChangeBatch: &types.ChangeBatch{
+					Changes: []types.Change{
+						types.Change{
+							Action:            types.ChangeActionUpsert,
+							ResourceRecordSet: &types.ResourceRecordSet{
+								// TODO
+							},
+						},
+					},
+				},
+			}
+			output, err := client.ChangeResourceRecordSets(ctx, &changes)
+			if err != nil {
+				logger.Error(err, "route53 update error")
+				return err
+			}
+			logger.Info(string(output.ChangeInfo.Status))
+		}
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
