@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	rebalancerv1 "github.com/ch1aki/rebalancer/api/v1"
-	"github.com/ch1aki/rebalancer/controllers"
+	rebalancerv1 "git.pepabo.com/akichan/rebalancer/api/v1"
+	"git.pepabo.com/akichan/rebalancer/controllers"
 	//+kubebuilder:scaffold:imports
 )
 

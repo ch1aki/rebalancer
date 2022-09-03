@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	rebalancerv1 "github.com/ch1aki/rebalancer/api/v1"
+	rebalancerv1 "git.pepabo.com/akichan/rebalancer/api/v1"
 	//+kubebuilder:scaffold:imports
 )
 

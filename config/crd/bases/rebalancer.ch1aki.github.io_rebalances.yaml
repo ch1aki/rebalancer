@@ -213,6 +213,8 @@ spec:
                 type: string
               currentValue:
                 type: string
+              lastUpdateAt:
+                type: string
             required:
             - condition
             type: object

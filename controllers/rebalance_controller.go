@@ -29,15 +29,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/argoproj/argo-rollouts/utils/evaluate"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/route53"
-	"github.com/aws/aws-sdk-go-v2/service/route53/types"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 
-	rebalancerv1 "github.com/ch1aki/rebalancer/api/v1"
+	rebalancerv1 "git.pepabo.com/akichan/rebalancer/api/v1"
+	"git.pepabo.com/akichan/rebalancer/controllers/provider"
 )
 
 // RebalanceReconciler reconciles a Rebalance object
@@ -90,6 +87,9 @@ func (r *RebalanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		logger.Error(err, "unable to parse interval string", "interval", rebalance.Spec.Rule.Interval)
 		return ctrl.Result{}, err
 	}
+
+	r.updateStatus(ctx, rebalance)
+
 	return ctrl.Result{
 		RequeueAfter: refreshInt,
 	}, nil
@@ -151,12 +151,13 @@ func (r *RebalanceReconciler) evalCondition(ctx context.Context, rebalance rebal
 		}
 		return evaluate.EvalCondition(results, string(rebalance.Spec.Rule.Condition))
 	default:
-		return false, fmt.Errorf("Prometheus metric type not supported")
+		return false, fmt.Errorf("prometheus metric type not supported")
 	}
 }
 
 func (r *RebalanceReconciler) updateStatus(ctx context.Context, rebalance rebalancerv1.Rebalance) (ctrl.Result, error) {
-	// TODO
+	current := time.Now()
+	rebalance.Status.LastUpdateAt = current.Format(time.RFC3339)
 
 	return ctrl.Result{}, nil
 }
@@ -165,50 +166,9 @@ func (r *RebalanceReconciler) rebalance(ctx context.Context, rebalance rebalance
 	logger := log.FromContext(ctx)
 	logger.Info("execute rebalance")
 
-	hostedZoneId := rebalance.Spec.Target.Route53.HostedZoneID
-	recordName := rebalance.Spec.Target.Route53.Resource.Name
-	recordId := rebalance.Spec.Target.Route53.Resource.Identifier
-
-	session := session.Must(session.NewSession())
-	client := route53.New(session)
-	out, err := client.ListResourceRecordSets(ctx,
-		&route53.ListResourceRecordSetsInput{
-			HostedZoneId:          aws.String(hostedZoneId),
-			StartRecordName:       aws.String(recordName),
-			StartRecordIdentifier: aws.String(recordId),
-		},
-	)
+	p, err := provider.NewProvider(ctx, rebalance)
 	if err != nil {
-		logger.Error(err, "list records error")
 		return err
-	}
-	if len(out.ResourceRecordSets) == 0 {
-		logger.Error(err, "list records error")
-		return fmt.Errorf("does't exist match record")
-	}
-
-	for _, rr := range out.ResourceRecordSets {
-		if *rr.Name == recordName && *rr.SetIdentifier == recordId {
-			changes := route53.ChangeResourceRecordSetsInput{
-				HostedZoneId: &hostedZoneId,
-				ChangeBatch: &types.ChangeBatch{
-					Changes: []types.Change{
-						types.Change{
-							Action:            types.ChangeActionUpsert,
-							ResourceRecordSet: &types.ResourceRecordSet{
-								// TODO
-							},
-						},
-					},
-				},
-			}
-			output, err := client.ChangeResourceRecordSets(ctx, &changes)
-			if err != nil {
-				logger.Error(err, "route53 update error")
-				return err
-			}
-			logger.Info(string(output.ChangeInfo.Status))
-		}
 	}
 
 	return nil

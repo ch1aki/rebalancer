@@ -81,6 +81,9 @@ type RebalanceStatus struct {
 
 	// +optional
 	CurrentValue string `json:"currentValue"`
+
+	// +optional
+	LastUpdateAt string `json:"lastUpdateAt"`
 }
 
 //+kubebuilder:object:root=true
