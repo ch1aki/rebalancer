@@ -138,6 +138,22 @@ spec:
                         type: integer
                       disableScaleIn:
                         type: boolean
+                      scheduled:
+                        items:
+                          properties:
+                            endTime:
+                              type: string
+                            startTime:
+                              type: string
+                            value:
+                              format: int64
+                              type: integer
+                          required:
+                          - endTime
+                          - startTime
+                          - value
+                          type: object
+                        type: array
                       targetValue:
                         format: int64
                         type: integer
