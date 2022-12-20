@@ -13,6 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/prometheus/common v0.32.1
 	github.com/stretchr/testify v1.8.0
+	github.com/thoas/go-funk v0.9.2
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
