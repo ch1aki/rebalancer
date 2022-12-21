@@ -10,12 +10,9 @@ spec:
       targetValue: 1
       baseValue: 1
       Scheduled:
-      - startTime:
-          hour: 11
-        endTime:
-          hour: 11
-          end: 30
-        value: 2
+      - startTime: "19:00"
+        endTime: "21:00"
+        value: 3
   target:
     route53:
       hostedZoneID: hostedzone/Z111111QQQQQQQ
