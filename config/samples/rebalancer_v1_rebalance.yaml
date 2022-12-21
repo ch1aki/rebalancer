@@ -9,6 +9,13 @@ spec:
     targettracking:
       targetValue: 1
       baseValue: 1
+      Scheduled:
+      - startTime:
+          hour: 11
+        endTime:
+          hour: 11
+          end: 30
+        value: 2
   target:
     route53:
       hostedZoneID: hostedzone/Z111111QQQQQQQ
