@@ -142,27 +142,9 @@ spec:
                         items:
                           properties:
                             endTime:
-                              properties:
-                                hour:
-                                  format: int64
-                                  type: integer
-                                min:
-                                  format: int64
-                                  type: integer
-                              required:
-                              - hour
-                              type: object
+                              type: string
                             startTime:
-                              properties:
-                                hour:
-                                  format: int64
-                                  type: integer
-                                min:
-                                  format: int64
-                                  type: integer
-                              required:
-                              - hour
-                              type: object
+                              type: string
                             value:
                               format: int64
                               type: integer

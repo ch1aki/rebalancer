@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strconv"
+	"strings"
 	"time"
 
 	rebalancev1 "git.pepabo.com/akichan/rebalancer/api/v1"
@@ -45,7 +47,10 @@ func (p *Policy) Estimate(ctx context.Context) (int64, error) {
 	// check scheduled values
 	if len(p.scheduled) > 0 {
 		nowTime := time.Now()
-		val = checkScheduledValue(p.scheduled, val, nowTime)
+		val, err = checkScheduledValue(p.scheduled, val, nowTime)
+		if err != nil {
+			return 0, fmt.Errorf("failed to check scheduled value")
+		}
 	}
 
 	return val, nil
@@ -59,23 +64,36 @@ func processBestContrast(base float64, trackingTargetVal float64, current float6
 	return int64(math.Ceil(base * rate))
 }
 
-func checkScheduledValue(scheduled []rebalancev1.Scheduled, v int64, nowTime time.Time) int64 {
+func checkScheduledValue(scheduled []rebalancev1.Scheduled, v int64, nowTime time.Time) (int64, error) {
 	var values []int
 	values = append(values, int(v))
-
 	for _, s := range scheduled {
-		startTime := parseTime(s.StartTime.Hour, s.StartTime.Min, nowTime)
-		endTime := parseTime(s.EndTime.Hour, s.EndTime.Min, nowTime)
+		startTime, err := parseTime(s.StartTime, nowTime)
+		if err != nil {
+			return 0, err
+		}
+		endTime, _ := parseTime(s.EndTime, nowTime)
+		if err != err {
+			return 0, err
+		}
 		if (nowTime.Equal(startTime) || nowTime.After(startTime)) && nowTime.Before(endTime) {
 			values = append(values, int(s.Value))
 		}
 	}
-
-	return int64(funk.MaxInt(values))
+	return int64(funk.MaxInt(values)), nil
 }
 
-func parseTime(hour, min int64, n time.Time) time.Time {
-	return time.Date(n.Year(), n.Month(), n.Day(), int(hour), int(min), 0, 0, time.Local)
+func parseTime(t string, n time.Time) (time.Time, error) {
+	ts := strings.Split(t, ":")
+	hour, err := strconv.Atoi(ts[0])
+	if err != nil {
+		return time.Time{}, err
+	}
+	min, err := strconv.Atoi(ts[1])
+	if err != nil {
+		return time.Time{}, err
+	}
+	return time.Date(n.Year(), n.Month(), n.Day(), hour, min, 0, 0, time.Local), nil
 }
 
 func init() {
