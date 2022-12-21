@@ -6,4 +6,13 @@ type TargetTrackingPolicy struct {
 
 	// +optional
 	DisableScaleIn bool `json:"disableScaleIn,omitempty"`
+
+	// +optional
+	Scheduled []Scheduled `json:"scheduled,omitempty"`
+}
+
+type Scheduled struct {
+	StartTime string `json:"startTime"`
+	EndTime   string `json:"endTime"`
+	Value     int64  `json:"value"`
 }
