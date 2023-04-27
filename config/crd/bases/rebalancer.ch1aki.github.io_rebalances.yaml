@@ -138,6 +138,9 @@ spec:
                         type: integer
                       disableScaleIn:
                         type: boolean
+                      minimum:
+                        format: int64
+                        type: integer
                       scheduled:
                         items:
                           properties:

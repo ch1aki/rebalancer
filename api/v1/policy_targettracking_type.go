@@ -5,10 +5,9 @@ type TargetTrackingPolicy struct {
 	BaseValue   int64 `json:"baseValue"`
 
 	// +optional
-	DisableScaleIn bool `json:"disableScaleIn,omitempty"`
-
-	// +optional
-	Scheduled []Scheduled `json:"scheduled,omitempty"`
+	DisableScaleIn bool        `json:"disableScaleIn,omitempty"`
+	Scheduled      []Scheduled `json:"scheduled,omitempty"`
+	Minimum        int64       `json:"minimum,omitempty"`
 }
 
 type Scheduled struct {
