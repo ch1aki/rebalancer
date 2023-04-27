@@ -19,6 +19,7 @@ type Policy struct {
 	baseValue           int64
 	disableScaleIn      bool
 	scheduled           []rebalancev1.Scheduled
+	minimum             int64
 }
 
 func (p *Policy) New(rebalance *rebalancev1.Rebalance, target *rebalancev1.TargetClient,
@@ -31,6 +32,7 @@ func (p *Policy) New(rebalance *rebalancev1.Rebalance, target *rebalancev1.Targe
 		baseValue:           rebalance.Spec.Policy.TargetTracking.BaseValue,
 		disableScaleIn:      rebalance.Spec.Policy.TargetTracking.DisableScaleIn,
 		scheduled:           rebalance.Spec.Policy.TargetTracking.Scheduled,
+		minimum:             rebalance.Spec.Policy.TargetTracking.Minimum,
 	}, nil
 }
 
@@ -43,6 +45,10 @@ func (p *Policy) Estimate(ctx context.Context) (int64, error) {
 
 	// process desired value
 	val := processBestContrast(float64(p.baseValue), float64(p.trackingTargetValue), currentMetric)
+	minimum := p.minimum
+	if val < minimum {
+		val = minimum
+	}
 
 	// check scheduled values
 	if len(p.scheduled) > 0 {
