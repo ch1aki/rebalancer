@@ -141,3 +141,7 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
 $(ENVTEST): $(LOCALBIN)
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+
+release: manifests
+	cd config/manager && kustomize edit set image controller=${IMG}
+	kustomize build config/default > ./release.yaml
